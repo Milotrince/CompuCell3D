@@ -12,20 +12,17 @@ from cc3d.player5.Utilities import qcolor_to_rgba, cs_string_to_typed_list
 import sys
 from collections import OrderedDict
 
-MODULENAME = '---- JupyterGraphicsFrameWidget.py: '
-
-# new stuff
 import vtk
 from ipyvtklink.viewer import ViewInteractiveWidget
 from cc3d import CompuCellSetup
+
+MODULENAME = '---- JupyterGraphicsFrameWidget.py: '
 
 
 class JupyterGraphicsFrameWidget():
     def __init__(self):
        
         self.is_screenshot_widget = False
-
-        # MDIFIX
 
         self.plane = None
         self.planePos = None
@@ -52,8 +49,6 @@ class JupyterGraphicsFrameWidget():
         self.fieldTypes = None
 
 
-        # todo 5 - adding generic drawer
-
         sim = cc3d.CompuCellSetup.persistent_globals.simulator
         boundary_strategy = None
         if sim:
@@ -63,21 +58,14 @@ class JupyterGraphicsFrameWidget():
         self.gd.set_interactive_camera_flag(True)
         self.gd.set_pixelized_cartesian_scene(Configuration.getSetting("PixelizedCartesianFields"))
 
-        # placeholder for current screenshot data
         self.current_screenshot_data = None
-
 
         self.camera2D = self.gd.get_active_camera()
         self.camera3D = self.gd.get_renderer().MakeCamera()
 
-        
-        
-#         set bsd basic simulation data
-#         access through pg > screenshot manager . bsd
-        # placeholder for currently used basic simulation data
+		# access basic sim data through pg
         self.pg = CompuCellSetup.persistent_globals
         self.current_bsd = self.pg.screenshot_manager.bsd
-        
         
         self.ren = self.gd.get_renderer()
         
@@ -91,11 +79,6 @@ class JupyterGraphicsFrameWidget():
         style = vtk.vtkInteractorStyleTrackballCamera()
         self.iren.SetInteractorStyle(style)
 
-        # Add actor to scene
-#         self.ren.AddActor(actor)
-        
-    
-
         self.metadata_fetcher_dict = {
             'CellField': self.get_cell_field_metadata,
             'ConField': self.get_con_field_metadata,
@@ -105,8 +88,6 @@ class JupyterGraphicsFrameWidget():
             'VectorFieldCellLevel': self.get_vector_field_metadata,
         }
 
-        
-        
 
     def copy_camera(self, src, dst):
         """
@@ -119,6 +100,7 @@ class JupyterGraphicsFrameWidget():
         dst.SetFocalPoint(src.GetFocalPoint())
         dst.SetPosition(src.GetPosition())
         dst.SetViewUp(src.GetViewUp())
+
 
     def get_metadata(self, field_name, field_type):
         """
@@ -136,6 +118,7 @@ class JupyterGraphicsFrameWidget():
 
         return metadata
 
+
     def get_cell_field_metadata(self, field_name, field_type):
         """
         Returns dictionary of auxiliary information needed to cell field
@@ -146,6 +129,7 @@ class JupyterGraphicsFrameWidget():
 
         metadata_dict = self.get_config_metadata(field_name=field_name, field_type=field_type)
         return metadata_dict
+
 
     def get_config_metadata(self, field_name, field_type):
         """
@@ -177,6 +161,7 @@ class JupyterGraphicsFrameWidget():
 
         return metadata_dict
 
+
     def get_con_field_metadata(self, field_name, field_type):
         """
         Returns dictionary of auxiliary information needed to render a give scene
@@ -185,7 +170,6 @@ class JupyterGraphicsFrameWidget():
         :return: {dict}
         """
 
-        # metadata_dict = {}
         metadata_dict = self.get_config_metadata(field_name=field_name, field_type=field_type)
         con_field_name = field_name
         metadata_dict['MinRangeFixed'] = Configuration.getSetting("MinRangeFixed", con_field_name)
@@ -200,6 +184,7 @@ class JupyterGraphicsFrameWidget():
         metadata_dict['DisplayMinMaxInfo'] = Configuration.getSetting("DisplayMinMaxInfo")
 
         return metadata_dict
+
 
     def get_vector_field_metadata(self, field_name, field_type):
         """
@@ -217,6 +202,7 @@ class JupyterGraphicsFrameWidget():
 
         return metadata_dict
     
+
     def compute_current_screenshot_data(self):
         """
         Computes/populates Screenshot Description data based ont he current GUI configuration
@@ -266,9 +252,6 @@ class JupyterGraphicsFrameWidget():
         :param basic_simulation_data: {instance of BasicSimulationData}
         :return: None
         """
-#         we are setting bsd in init
-#         self.current_bsd = basic_simulation_data
-
         if self.current_screenshot_data is None:
             self.initialize_scene()
 
@@ -278,13 +261,6 @@ class JupyterGraphicsFrameWidget():
 
         # this call seems to be needed to refresh qvtk widget
         self.gd.get_renderer().ResetCameraClippingRange()
-        
-        # essential call to refresh screen . otherwise need to move/resize graphics window
-#         qt stuff >:(
-#         self.Render() 
-        # get_view_test.render()
-    
-    
     
 
     def store_gui_vis_config(self, scr_data):
@@ -294,13 +270,15 @@ class JupyterGraphicsFrameWidget():
         :param scr_data: {instance of ScreenshotDescriptionData}
         :return: None
         """
-#         tvw = self.parentWidget()
+		# TODO: Create jupyter buttons dashboard for various view options
 
+#         tvw = self.parentWidget()
 #         scr_data.cell_borders_on = tvw.border_act.isChecked()
 #         scr_data.cells_on = tvw.cells_act.isChecked()
 #         scr_data.cluster_borders_on = tvw.cluster_border_act.isChecked()
 #         scr_data.cell_glyphs_on = tvw.cell_glyphs_act.isChecked()
 #         scr_data.fpp_links_on = tvw.fpp_links_act.isChecked()
+
         scr_data.lattice_axes_on = Configuration.getSetting('ShowHorizontalAxesLabels') or Configuration.getSetting(
             'ShowVerticalAxesLabels')
         scr_data.lattice_axes_labels_on = Configuration.getSetting("ShowAxes")
